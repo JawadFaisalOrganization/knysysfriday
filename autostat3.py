@@ -1,6 +1,5 @@
 #!/usr/bin/python2.7
 import warnings
-import time
 def customwarn(message, category, filename, lineno, file=None, line=None):
         
         pass
@@ -69,7 +68,6 @@ class AutostataCommandLine(object):
         else:
             myargv.append("-e")
             myargv.append("SKLearn")
-            #engines["Autostat_SKLearn"]["init"]()
         self.custom_init()
         self.collect_options()
         self.add_options()
@@ -450,7 +448,7 @@ def jank_read(plugin):
 
 
 def common_code(myargv, data_list=None):
-    print "JAWAD FAISAL"
+    
     try: 
         exec(jank_read(file_location+"/autostat_plugin_sk_all.py"),globals()) # others may take a dependency on this
     except: pass
@@ -462,10 +460,8 @@ def common_code(myargv, data_list=None):
             pass
             exec(j,globals())
         except: pass
-    print "2ND JAWAD FAISAL"    
-    AutostataCommandLine()
+
     engines["Autostat_SKLearn"]["init"]()
-    print "LAST"
    
     
 myargv = sys.argv
@@ -509,10 +505,6 @@ def autostat(data , args, output):
     else:
         data_list = None
         myargv.append(data)
-    
-   
-        
     res = common_code(myargv, data_list)
-     
     return res
     
