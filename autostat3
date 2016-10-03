@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import warnings
 def customwarn(message, category, filename, lineno, file=None, line=None):
+        
         pass
 
 warnings.showwarning = customwarn
@@ -10,24 +11,18 @@ import pandas as pd
 import optparse
 import numpy as np
 from abc import ABCMeta, abstractmethod
-
 from glob import glob
 import json
-
 from math import *
-
 #ML methods
 from sklearn import preprocessing
 from sklearn.externals import joblib
-
 from pandas_confusion import ConfusionMatrix
 from sklearn.metrics import mean_squared_error, classification_report, explained_variance_score, r2_score
-
 o=None
 global myargv
 myargv = sys.argv
 myargv.pop(0)
-
 metrics = [
     ['regression_metrics', "Metrics useful for measuring closeness to a numerical target"],
     ['classification_metrics', "Metrics useful for measuring whether a target was classified correctly"],
@@ -43,7 +38,6 @@ def make_metrics_text(prefix_spaces=0):
     for i in metrics: 
         metrics_text += (" " * prefix_spaces) + i[0] + ": " + i[1] + "\r\n"
     return metrics_text
-    
 
 class Autostat(object):
     __metaclass__ = ABCMeta
@@ -51,28 +45,22 @@ class Autostat(object):
     def __init__(self, autorun=True, o=None):
         
         usage = "%prog [options] [file to model or predict, blank for stdin]\n"
-
         self.parser = optparse.OptionParser(usage=usage)
         self.pickler = joblib
         self.engineobj = None
         self.enginestash = {}
         self.predictions = None
-        
         if o!=None: self.o = o
-        
         self.denormalized = None
         self.featuremap = {}
-        
         self.disable_model_pickle = False
         self.model = None
-        
         self.custom_init()
         self.collect_options()
         self.add_options()
         self.absorb()
         if self.o.predict: self.load_model()
         self.normalize()
-        
         if not self.o.predict:
             self.set_model()
             self.train()
@@ -106,6 +94,7 @@ class Autostat(object):
         self.reportgroup.add_option("", "--report", dest="reportopts", default="", help="What to report, comma separated.  'help' for list.\n")
 #        parser.add_options("",  "--output-tag", dest="outputtag", default=False, action="store_true", help="Tag CSV output with AUTOSTAT_AUTOSTAT for grep/cutting")
     def add_options(self):
+        
         self.parser.add_option_group(self.reportgroup)
         if hasattr(self, "o"): return
         self.o, remainder = self.parser.parse_args(myargv)
@@ -128,13 +117,14 @@ class Autostat(object):
         else: self.o.reportopts.append("basic")
 
     def absorb(self):
+        
         #TODO:  XLS/XLSX
         source=None
         if len(self.o.filename)>1: source = open(self.o.filename, "rb")
         else:                      source = sys.stdin
 
         self.df = pd.read_csv(source)
-
+        
         targetraw = self.o.target
         if type(targetraw)==str and targetraw.isdigit(): targetraw=int(targetraw)
         if type(targetraw)==int:
@@ -147,11 +137,8 @@ class Autostat(object):
             print >> sys.stderr, "Couldn't find column.  Case sensitive?"
             sys.exit(100)
 
-
-
-
     def normalize(self):
-        #print self.df
+        
         df=self.df
         self.originaldf = df.copy()
         for colname in self.df.columns:
@@ -162,26 +149,18 @@ class Autostat(object):
             elif col.dtype != "object":
                 colType = "numerical"
                 if len(col.unique())==2: colType = "categorical"
-#                if (self.o.integercat == "_target" and colname == self.o.target) or (colname in self.o.integercat.split(",")) or (self.o.integercat == "_all"):
-#                    if col.dtype == 'int64': colType = "categorical"
-            else: colType = "categorical"
+            else: 
+                colType = "categorical"
             
             if colType=="numerical":
                 if colname==self.o.target: self.o.mode = "regression"
                 if not self.o.normalize_numerical: continue
-                #if col.dtype==np.int64 and col.min()==0 and col.max()==1: continue
                 if not self.o.predict:
                     self.featuremap[colname]={ "colType": "numerical", "scaleFactor": col.max() }
                     col/=col.max()
                 else:
                     col/=self.featuremap[colname]["scaleFactor"]
                 
-                    
-                #min_max_scaler = preprocessing.MinMaxScaler()
-                #x_scaled = min_max_scaler.fit_transform(np.array(col.astype(float)).reshape(-1, 1))
-                #print x_scaled
-                #col=x_scaled; #/=float(self.df[colname].max())
-                #x_scaled
             else:
                 if colname==self.o.target: self.o.mode = "classification"
                 if not self.o.normalize: continue
@@ -203,6 +182,7 @@ class Autostat(object):
                     col=col.astype('category').cat.codes
                 else:
                     def get_feature(x):
+                        
                         ret = x
                         try: return self.featuremap[colname]["nameToNum"][x]
                         except: pass
@@ -214,13 +194,19 @@ class Autostat(object):
         self.X = np.array(self.df.drop(self.o.target,axis=1))
 
     def set_model(self):
+        
         pass
     
-    def train(self):
-        self.model.fit(self.X, self.y)
-        pass
+    # def train(self):
+       # print "train"
+    #     print "############################"
+    #     print self.model
+    #     print "############################"
+    #     self.model.fit(self.X, self.y)
+    #     pass
     
     def save_model(self):
+        
         autostat_model = {
                               "o": self.o,
                     "enginestash": self.enginestash,
@@ -234,6 +220,7 @@ class Autostat(object):
         print >> sys.stderr, "Model saved.  Run with -p to measure prediction.  Use -o - to emit predicted CSV to standard out."
         
     def load_model(self):
+        
         a = self.pickler.load("modeldir/model.pkl")
         try: self.model = a['model']
         except: pass
@@ -254,24 +241,29 @@ class Autostat(object):
 
 
     def hide_truth(self):
+        
         if 1: #not self.o.sktsr:
             self.df = self.df.drop(self.o.target, axis=1)
 
     def predict(self):
+        
         try:
             self.predictions=self.model.predict(self.df)
         except:
             self.predictions=self.model.predict(np.array(self.df))
 
     def absorb_predictions(self):
+        
         self.df = self.originaldf
         if self.predictions!=None: self.df['PREDICTION']=self.predictions
         #self.df['PREDICTION']*=self.featuremap[self.o.target]["scaleFactor"]
         #self.df.insert(self.o.targetcol, self.o.target, self.backup, False)
 
     def report(self):
+        
         test_df = self.df
         def denormalize(x):
+            
             colfeatures = self.featuremap[self.o.target]
             if colfeatures["colType"]=="categorical":
                 return colfeatures["numToName"][round(x)]
@@ -291,6 +283,7 @@ class Autostat(object):
             if self.featuremap[self.o.target]['colType']=="numerical":
                 t['T']=test_df[self.o.target].astype(float).apply(round)
                 def minzero(x):
+                   
                    if x<0: return 0
                    return x
                 t['P']=test_df['PREDICTION'].astype(float)
@@ -315,13 +308,8 @@ class Autostat(object):
             if "classification_metrics" in self.o.reportopts:
                 summary.append(str(classification_report(t['T'], t['P'], target_names=self.o.target)))
             if "basic" in self.o.reportopts:
-                #summary.append(",".join(self.df.columns.tolist()))
-                #summary.append(" ".join(["TARGET:", self.o.target]))
-                #summary.append(" ".join("Predicting", self.o.target, "from:", ','.join(self.df.drop(self.o.target, axis=1).columns.tolist())))
                 summary.append("Prediction Level: %2.2f (%s false, %s true)" % (stats["predicted"], stats[False], stats[True]))
                 
-            #x=cm.stats()
-            #if "basic" in self.o.r
         if 1: #self.o.mode == "regression": #:# or self.o.mode=="regression":
             try: 
                 self.outcols = [self.o.target, 'PREDICTION']
@@ -338,6 +326,7 @@ class Autostat(object):
         for s in summary: print >> sys.stderr, s
     
     def write_output(self):
+        
         df = self.df
         out_df = ""
         
@@ -347,10 +336,6 @@ class Autostat(object):
         if self.o.outputmode=="full": out_df=df
         if self.o.outputmode=="inplace":
             out_df=df.copy()
-            #out_df.insert(0,self.o.target,out_df['PREDICTION'])
-            #if tcol.min()==0 and tcol.max()==1 and len(tcol.unique().tolist())==2:
-            #    out_df[self.o.target]=out_df['PREDICTION'].apply(round)
-            #    out_df[self.o.target]=out_df[self.o.target].astype(int)
             out_df[self.o.target] = out_df['PREDICTION']
             try: out_df=out_df.drop('PREDICTION', axis=1)
             except: pass
@@ -358,19 +343,16 @@ class Autostat(object):
             except: pass
             try: out_df=out_df.drop('CORRECT', axis=1)
             except: pass
-#               out_df.drop['DIFFERENCE']
         if type(out_df)==str:
             print >> sys.stderr, "Invalid Mode"
             sys.exit(7)
         if self.o.output == "-": self.o.output = sys.stdout
-#        if self.o.outputtag:
-#            out_df['AUTOSTAT_AUTOSTAT']="AUTOSTAT_AUTOSTAT"
-#            out_df.insert(0, "AUTOSTAT_AUTOSTAT", stupid, )
         try: out_df.to_csv(self.o.output, index=False)
         except IOError: pass
         except: raise
         
     def restart(self):
+        
         if self.o.testfilename and not self.o.predict:
             self.o.predict = True
             self.o.filename = self.o.testfilename
@@ -382,7 +364,7 @@ class Autostat(object):
 engines = {}
 classification_engines = []
 regression_engines     = []
-def register_engine(init, canHandle={}):    
+def register_engine(init, canHandle={}):
     name = str(init.__name__)
     engine=engines[name]={}
     engine["init"] = init
@@ -396,16 +378,11 @@ def jank_read(plugin):
     loaded[plugin]=True
     j = open(plugin, "r").read()
     return str(j)
-
-
-
 class PreOptionParser(optparse.OptionParser):
     def exit(self, str):
         pass
     def error(self, str):
         pass
-
-
 p = PreOptionParser()
 p.add_option("-e", "--engine", dest="engine", default=None, help="Explicitly select engine.  List available with 'help'.")
 p.remove_option("-h")
@@ -413,24 +390,13 @@ o, remainder = p.parse_args(myargv)
 
 try: exec(jank_read("autostat_plugin_sk_all.py")) # others may take a dependency on this
 except: pass
-
 for plugin in glob("autostat_plugin_*.py"):
     j = jank_read(plugin)
     try:
         pass
         exec(j)
     except: pass
-
-
 if o.engine == "help":
-    #usage= "Available Classification Engines:\n"
-    #for c in classification_engines:
-    #    if c[0:len(ns)]=="Autostat_": c="_".join(c.split("_")[1:])
-    #    usage+= "   " + c + "\n"
-    #usage+= "Available Regression Engines:\n"
-    #for r in regression_engines:
-    #    if r[0:len(ns)]=="Autostat_": r="_".join(r.split("_")[1:])
-    #    usage+= "   " + r + "\n"
     ns="Autostat_"
     usage= "Available Engines:\n"
     for e in engines.keys():
