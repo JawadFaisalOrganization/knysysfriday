@@ -1,10 +1,11 @@
-FROM ubuntu
+FROM rickyking/ds-xgboost-anaconda-jupyter
 
-RUN apt-get update && apt-get -y install python-dev pkg-config libfreetype6-dev openjdk-8-jre-headless libxml2-dev libboost-dev libboost-program-options-dev libboost-python-dev git build-essential libatlas-base-dev nano python-pip
+ADD src/*.py /opt/conda/lib/python2.7/site-packages/autostat/
+ADD src/autostat3 /usr/bin/
+RUN mkdir /work;\
+pip install pandas-confusion;
 
-ADD / /
+WORKDIR /work
+#ENTRYPOINT ["python2.7", "/usr/bin/autostat3"]
 
-RUN pip install -r /requirements.txt
-
-ENTRYPOINT /bin/bash
 
