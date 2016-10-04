@@ -1,0 +1,999 @@
+{% extends "web/base.html" %}
+
+
+{% block content %}
+{% load staticfiles%}
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="col-md-7">
+     <ul class="nav nav-tabs nav-justified">
+      <li {% if not request.GET.tab %} class="active"  {% endif %} ><a href="#tab1default" data-toggle="tab">Post</a></li>
+      <li {% if request.GET.tab %} class="active"  {% endif %}  ><a disabled="disabled" href="#tab3default" data-toggle="tab">My Listings</a></li>
+    </ul>
+    <div class="tab-content" style="position: relative">
+      <div class="tab-pane fade {% if not request.GET.tab %} in active {% endif %}" id="tab1default" style="position:relative; z-index:1">
+        <div id="tab1default-1">
+          <div class="list-group" id="catListing">
+            <ul id="listItems" class="item margin-0 padding-0">
+              {% for item in categories %}
+              <li class="list-group-item" onclick="getSubCat('{{item.id}}', '{{item.name}}')">
+                {{ item.name }}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        <div id="dynamicForm">
+            <p>&nbsp</p>
+            <p>&nbsp</p>
+            <h6 style="" id="breadcrumb">Autos > Car for Sale</h6>
+            <p style="">*Required Field &nbsp&nbsp<a class="btn-warning" id="image-caption" role="button"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></a><label class="pull-right" style=" color: #00b050;">
+              <input type="checkbox" id="featured" onclick="loadDynamicForm(false);"> FEATURED LISTING
+            </label></p>
+            <form class="form-inline" enctype="multipart/form-data" method="post">
+              <!--Dynamic form fields are being generated while selecting categories-->
+            </form>
+            <div class="card-action">
+              <a onclick="location.reload();">Cancel</a>
+              <a id="save-listing-btn" onclick="save_listing(false)">Save</a>
+              <a id="postpre" >Preview</a>
+              <a href="#post-preview" data-toggle="tab" aria-expanded="false" style="display:none">Preview</a>
+            </div>
+        </div>
+      <div id="image-and-captions"></div>
+
+      </div>
+       <div class="tab-pane fade" id="post-preview">
+
+        <div class="box" data-toggle="modal" data-target="#popup-preview">
+           <div class="f-listing preview-featured"><span class="glyphicon glyphicon-star" style="color: #229500;" aria-hidden="true"></span> FEATURE LISTING </div>
+           <div class="col-box-featured" style="color: #000;">
+           <div class="col-1" style="padding: 0;"><img class="previewImg" src="../static/images/pic-no.jpg" style="width:100%, height:100%">
+           <span class="col-1-d"><small>Cap 1</small></span></div>
+           <div class="col-2">
+               <div class="text-right"></div>
+               <div class="text-p">
+                   <p class="pmargin"><b class="previewTitle"></b></p>
+                   <p class="pmargin previewContent"></p>
+               </div>
+           </div>
+           <div class="clearfix"></div>
+             <div class="text-down" style="padding-bottom: 6px;"><small>&nbsp</small>
+               <div class="text-icon">
+               </div>
+             </div>
+           </div>
+         </div>
+       <!-- /box -->
+
+       <p>&nbsp</p>
+       <p>&nbsp</p>
+       <!-- Small modal -->
+       <!--  <button type="button" class="btn btn-default center-block" data-toggle="modal" data-target=".b -->
+
+      <!-- s-example-modal-sm" style="background-color: #ffca2c; padding: 15px;"><strong>BACK</strong></button> -->
+      <div class="card-action">
+       <center><button type="button" onclick="save_listing(true);" class="btn btn-default center-block" style="background-color: #ffca2c; padding: 15px;"><strong>Post Listing</strong></button><br><br><br></center>
+       <a style="float:left; padding-left:20%" onclick="save_listing(false);">SAVE</a> <a href="#tab1default" aria-expanded="true" data-toggle="tab" style="float:right; padding-right:20%">END PREVIEW</a>
+      </div>
+
+       <div id="popup-preview" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header" style="background: #343434;"> <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> <h4 class="modal-title" id="mySmallModalLabel"  style="color: #fff;">Listing Detail</h4> </div>
+             <div class="box" data-toggle="modal" data-target="#popup-preview">
+               <div class="col-box" style="color: #000;">
+               <div class="col-1" style="padding: 0;"><img class="previewImg" src="../static/images/pic-no.jpg" style="width:100%, height:100%">
+               <span class="col-1-d"><small>Cap 1</small></span></div>
+               <div class="col-2">
+                   <div class="text-right"></div>
+                   <div class="text-p">
+                       <p class="pmargin"><b class="previewTitle"></b></p>
+                       <p class="pmargin previewContent"></p>
+                   </div>
+               </div>
+               <div class="clearfix"></div>
+                 <div class="text-down" style="padding-bottom: 6px;"><small>&nbsp</small>
+                   <div class="text-icon">
+                   </div>
+                 </div>
+               </div>
+             </div>
+         </div>
+       </div>
+     </div>
+   </div><!-- /.app-page -->
+   <div class="tab-pane fade {% if request.GET.tab %} in active {% endif %} " id="tab3default">
+    <div id="tab3default-1">
+      <p>&nbsp</p>
+      <p>&nbsp</p>
+      <div class="col-xs-12">
+        <ul class="list-inline" style="margin: 0;">
+          <li style="border-bottom: #ffc000 solid 3px;"><a href="/dashboard?tab=3&orderby=date&list={{request.GET.list}}"  style="color: #fff;">DATE </a></li>
+          <li> <a href="/dashboard?tab=3&orderby=category&list={{request.GET.list}}"   style="color: #fff;">CATEGORY</a></li>
+          <li style="float: right;">
+            <div class="btn-group">
+             <button type="button" class="btn2 btn-default-2 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">LISTINGS &nbsp&nbsp<span class="glyphicon glyphicon-chevron-down" aria-hidden="true">
+             </button>
+             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a onclick="getMyListings('',1);" >All</a></li>
+              <li><a onclick="getMyListings('=1',1);" >Posted</a></li>
+              <!--li role="separator" class="divider"></li-->
+              <li><a onclick="getMyListings('=0',1);" >Unposted</a></li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="clearfix"></div>
+
+    <!-- Issue here -->
+    <div id="myListings"></div>
+    <div class="clearfix"></div>
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li><a id="prev-link" href="#" aria-label="Previous" style="padding: 9px;"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Prev</a></li>
+        <li><a id="next-link" href="#" aria-label="Next" style="padding: 9px;">Next<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Issue  -->
+
+
+
+<div class="col-sm-4 col-md-4 blog-sidebar">
+  <div class="sidebar-module" style="margin-bottom: 0;">
+    {% include "web/ad2.html" %}
+  </div>
+</div><!-- /.sidebar -->
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://rawgit.com/makeusabrew/bootbox/f3a04a57877cab071738de558581fbc91812dce9/bootbox.js"></script>
+
+<script>
+var cat_name;
+var catId;
+var subCatId;
+var subCat2Id;
+var is_featured = 0;
+var requiredFormFields = [];
+getMyListings("",1);
+$(document).ready(function(){
+   $('#featured').attr('checked', false);
+   $('#dynamicForm').hide();
+   $('#image-and-captions').hide();
+   $('#catListing').show();
+ });
+
+  $('.item').on('click','li', function(){
+
+    if($(this).children(".subitem").is(":visible"))
+    {
+   ; //$(this).children(".subitem").hide();
+ }
+ else
+ {
+  $(this).children(".subitem").show().end().siblings().find('.subitem').hide();
+}
+});
+
+
+ $('#postpre').click(function(e) {
+
+     var parishName
+     var areaName
+     var phone1
+     var result = $('form.form-inline').find("select, input").serializeObject();
+     if (!$("#featured").is(':checked')){
+        $('.col-box-featured').css('background-color', 'white');
+        $('.preview-featured').hide();
+     }
+
+     if(validateFormFields(result)){
+         $('a[href="#post-preview"]').tab('show');
+         $.each(getParishList(), function(index, value) {
+             if (value.id == result.Parish) {
+                 parishName = value.name
+             }
+         });
+         $.each(getAreaList(result.Parish), function(index, value) {
+             if (value.id == result.Area) {
+                 areaName = value.name
+             }
+         });
+        var content = '';
+        if (result.Currency) content+=result.Currency;
+        if (result.Price) content+=result.Price;
+        if (result.Per) content+="per "+result.Per;
+        if (content) content+='<br>';
+        if (result.Parish && result.Area) content+=result.Parish+","+result.Area+"<br>";
+        if (result['Phone 1']) content+=result['Phone 1'];
+        $('.previewContent').append(content);
+        $(".previewTitle").text(result.Title);
+        $('.previewImg').attr("src", "{{base_url}}/static/images/pic-no.jpg");
+
+      } else {
+          e.preventDefault();
+      }
+
+ });
+
+$.fn.serializeObject = function()
+{
+  var o = {};
+  var a = this.serializeArray();
+  $.each(a, function() {
+    if (o[this.name] !== undefined) {
+      if (!o[this.name].push) {
+        o[this.name] = [o[this.name]];
+      }
+      o[this.name].push(this.value || '');
+    } else {
+      o[this.name] = this.value || '';
+    }
+  });
+  return o;
+};
+
+function delete_post(post_id){
+    bootbox.confirm("Are you sure you want to delete this listing?", function(result){
+          if (result === true) {
+              $.ajax({
+                  url: "{{base_url}}/api/deletePost/"+post_id+"/",
+                  type: 'DELETE',
+                  beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+                  success: function(result) {
+                      $('#'+post_id).remove();
+                  }
+              });
+          }
+    });
+}
+
+
+function copy_post(listing_id , post_category)
+{
+  var copy_listing_id = get_listing_id_for_category(post_category);
+
+  $.ajax({
+    url: "{{base_url}}/api/copyPost/"+listing_id+"/"+copy_listing_id+"/",
+    type: 'POST',
+    beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+    success: function(result) {
+      console.log(result);
+    }
+  });
+}
+
+function get_listing_id_for_category(post_category)
+{
+  url ='/dashboard/get_listing_id/';
+  data = {'post_category':post_category,
+  'csrfmiddlewaretoken': '{{csrf_token}}'
+};
+listingId = "";
+$.ajax({
+  async: false,
+  url: url,
+  type: "POST",
+  data: data,
+  success: function(response)
+  {
+    listingId = response.listing_id;
+
+  },
+  error: function(jqXHR, textStatus, errorMessage)
+  {
+    console.log("error");
+  }
+});
+return listingId;
+}
+
+
+
+function edit_post(post_category_name, post_category_id, post_sub_cat_id, post_sub_cat2_id, listing_id)
+{
+        //setting the global variables to load the form
+        cat_name = post_category_name;
+        catId = post_category_id;
+        subCatId = (post_sub_cat_id == "null")? undefined : post_sub_cat_id;
+        subCat2Id = (post_sub_cat2_id == "null")? undefined : post_sub_cat2_id;
+
+        console.log("\nVariable values :- "+ " cat_name : " + cat_name + " cat_id : "+ catId+ " subcatID : " + subCatId + " subcat_id2 : "+ subCat2Id );
+        loadDynamicForm(listing_id);
+        post_info = get_post_info(listing_id);
+        populate_edit_form(post_info);
+        $("#featured").attr('disabled', true).parent().css( "color", "gray" );
+        $('.nav a[href="#tab1default"]').tab('show');
+        $("#save-listing-btn").removeAttr("onclick").attr("onclick","updatePost('"+listing_id+"')");
+}
+
+
+function get_post_info(listing_id)
+{
+        var url = "{{base_url}}/api/viewPost/"+listing_id+'/'
+        var data = {'csrfmiddlewaretoken': '{{csrf_token}}'}
+        post_info = "";
+        $.ajax({
+          async: false,
+          url: url,
+          type: "GET",
+          data: data,
+          success: function(response)
+          {
+            post_info = response;
+          },
+          error: function(jqXHR, textStatus, errorMessage)
+          {
+            console.log("error");
+          }
+        });
+        return post_info;
+}
+
+function populate_edit_form(post_info)
+    {
+      dict = post_info;
+        if (dict.featured === true)
+            $("#featured").prop( "checked", true);
+
+        $.each(dict.fields, function(index, this_value)
+                    {
+                        name = this_value.field.name;
+                        value = (this_value.value);
+                      if(!name.includes("Photo "))
+                      {
+                        $("input[name=\""+name+"\"]").val(value);
+                      }
+                      if (name == "Parish" && value != null) {
+                            $.each(getParishList(), function(index, parish) {
+                                 if (parish.name == value) {
+                                     parish_id = parish.id
+                                     setAreaDropdown(parish_id);
+                                 }
+                             });
+                            $("select[name=\""+name+"\"] option[value=\""+parish_id+"\"]").attr('selected', 'selected');
+
+                        }
+                        else if (name == "Area" && parish_id !=null) {
+                            $.each(getAreaList(parish_id), function(index, area) {
+                                 if (area.name == value) {
+                                     area_id = area.id
+                                 }
+                             });
+                            $("#selectArea").find("option[value=\""+area_id+"\"]").attr('selected', 'selected');
+                        }
+
+                       else {
+                            $("select[name=\""+name+"\"] option[value=\""+value+"\"]").attr('selected', 'selected');
+                        }
+                    }
+               )
+    }
+
+function updatePost(listing_id) {
+   $('form.form-inline').append($("#image-and-captions"));
+   var formData=$('form.form-inline').find("select, input").serializeObject();
+   var formData2 = new FormData($('form.form-inline')[0]);
+   if(validateFormFields(formData)){
+       var url = "{{base_url}}/api/editPost/"+listing_id+'/'
+       var data = {};
+       $.each(formData, function( index, value ) {
+          if(value != '' && index != 'jacId')
+            data[index] = value;
+
+       });
+        $.ajax({
+            url: url,
+            type: 'PUT',
+            data: formData2,
+            processData: false,
+            contentType: false,
+            beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+            success: function(result) {
+                requiredFormFields = [];
+                window.setTimeout('location.reload()', 1000);
+            }
+        });
+   }
+}
+
+function save_listing(posted){
+    $('form.form-inline').append($("#image-and-captions"));
+   
+    var formData=$('form.form-inline').find("select, input").serializeObject();
+    var formData2 = new FormData($('form.form-inline')[0]);
+
+    if(validateFormFields(formData)){
+        var new_listing_id = formData.jacId;
+        var url = "{{base_url}}/api/savePost/";
+        if ($("#featured").is(':checked'))
+<<<<<<< HEAD
+            url+="featured/";
+        if (catId != undefined) { url+= catId +"/"; }
+        if (subCatId != undefined) { url+= subCatId +"/"; }
+        url+=new_listing_id+"/";
+       
+        if (posted)
+            data['submit'] = 1;
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData2,
+            processData: false,
+            contentType: false,
+
+            beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+            success: function(result) {
+                requiredFormFields = [];
+                window.setTimeout('location.reload()', 1000);
+            }
+        });
+    };
+}
+
+function validateFormFields(fields){
+    var noError = true;
+    $.each(requiredFormFields, function(k, v){
+        var error_id = v.replace(' ', '_');
+        if (fields[v] == undefined || fields[v] == '') {
+            $('#error_'+error_id).text(v+' is required');
+            noError = false;
+        }
+        else {
+            $('#error_'+error_id).text('');
+        }
+    });
+
+    return noError;
+}
+
+    function getParishList(){
+      var parishList = [];
+
+      $.ajax({
+        async: false,
+        url: "{{base_url}}/auth/parish/",
+        type: 'GET',
+        beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+        success: function(result) {
+          parishList = result;
+        }
+      });
+      return parishList;
+    }
+
+    function getAreaList(parish_id) {
+      var areaList = [];
+      $.ajax({
+        async: false,
+        url: "{{base_url}}/auth/area/"+parish_id+"/",
+        type: 'GET',
+        beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+        success: function(result) {
+          areaList = result;
+        }
+      });
+
+      return areaList;
+
+    }
+
+    function setAreaDropdown(parish_id) {
+      areaList = getAreaList(parish_id)
+      $.each(areaList,function (ind, val) {
+        $("#selectArea").append('<option value="'+val.id+'">'+val.name+'</option>');
+      });
+
+    }
+
+    function getSubCat(c_Id, cName) {
+
+      catId = c_Id;
+      cat_name = cName;
+      $('#breadcrumb').text(cat_name);
+
+      var items = [];
+      $.ajax({
+        async: false,
+        url: "{{base_url}}/api/subcategories/"+catId+"/",
+        type: 'GET',
+        beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+        success: function(result) {
+          items = result;
+          if (items.length > 0){
+            $('#listItems').empty();
+            $.each(items, function(index, value){
+              $('#listItems').append('<li class="list-group-item" onclick="getSubCat2('+value.id+')">'+value.name+'</li>');
+            });
+          } else {
+            loadDynamicForm(false)
+          }
+        }
+      });
+    }
+
+    function getSubCat2(subId) {
+      subCatId = subId;
+
+      var items = [];
+      $.ajax({
+        async: false,
+        url: "{{base_url}}/api/subcategories2/"+subCatId+"/",
+        type: 'GET',
+        beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+        success: function(result) {
+          items = result;
+          if (items.length > 0){
+            $('#listItems').empty();
+              $.each(items, function(index, value){
+                $('#listItems').append('<li class="list-group-item" onclick="onSubCat3('+value.id+')">'+value.name+'</li>');
+              });
+          } else {
+            loadDynamicForm(false);
+          }
+        }
+      });
+    }
+
+    function onSubCat3(sub2Id){
+      subCat2Id = sub2Id;
+      loadDynamicForm(false);
+    }
+
+    function loadDynamicForm(listing_id) {
+
+     $('#dynamicForm').show();
+     $('#image-and-captions').hide();
+     $('#catListing').hide();
+
+     is_featured = 0;
+     if ($("#featured").is(':checked'))
+     {
+      is_featured = 1;
+      $(".form-inline").empty();
+           $("#image-and-captions").empty();
+           alert('JAJJJJAJ')
+    }
+
+    var input_type = {
+      'Char':'text',
+      'Image':'file',
+      'Choice':'select',
+      'Boolean':'text',
+      'Time':'text',
+      'Date':'date',
+      'Decimal':'text',
+      'Integer':'text'}
+
+      var composite_type = {} ;
+      var boolean_tem = {} ;
+      var char_Bulletted = [];
+
+      if (is_featured === 1)
+        var formUrl = "{{base_url}}/api/form/featured/"+catId+"/";
+      else
+        var formUrl = "{{base_url}}/api/form/"+catId+"/";
+      if(subCatId != undefined) {formUrl+=subCatId+"/"}
+        if(subCat2Id != undefined) {formUrl+=subCat2Id+"/"}
+          var formFields = [];
+        $.ajax({
+          async: false,
+          url: formUrl,
+          type: 'GET',
+          beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+          success: function(result) {
+           formFields = result;
+           $(".form-inline").empty();
+<<<<<<< HEAD
+           $("#image-and-captions").empty();
+           $("#image-and-captions").append("<a style='color:white;' onclick='goBack();' >Back</a>");
+      }
+  });
+ var captionNo=1;
+  $.each(formFields, function(key, val) {
+       var icon = getAppropriateIcon(val);
+       var error_id = val.name.replace(' ', '_');
+
+       if (val.field_type=='Char' || val.field_type=='Decimal' || val.field_type=='Time' || val.field_type=='Date' || val.field_type=='Integer') {
+          if(char_Bulletted.indexOf(val.id) != -1 )
+          { return true; }
+          if(!val.name.includes("Caption")) {
+             $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> <div class='input-group-addon-2'><span class='glyphicon glyphicon-pencil' aria-hidden='true'> </span></div> <input type='"+input_type[val.field_type]+"'  name='"+val.name+"'class='form-control-2' placeholder='"+val.name+"'> </div>");
+          }
+       }
+       else if (val.field_type=='Choice')
+       {
+
+            if (val.name == 'Parish') {
+               $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' onchange='setAreaDropdown(this.value);'></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+               $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+               $.each(getParishList(), function(index, value) {
+                    $("#"+val.id).append('<option value="'+value.id+'">'+value.name+'</option>');
+               });
+            }
+            else if (val.name == 'Area'){
+               $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='selectArea' name='"+val.name+"'></select><span style='color:red;' id='error_"+error_id+"'></span> </div>");
+               $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+            }
+            else if (val.name == 'Currency' && val.extra_attributes !== null)
+            {
+                $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+                $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+                data_attributes = eval('(' + val.extra_attributes + ')');
+                data_attributes = data_attributes.split(':')[1]
+                data_attributes = data_attributes.replace('(','');
+                data_attributes = data_attributes.replace(')','');
+                data_attributes = data_attributes.split(',')
+                for (var optn=0; optn < data_attributes.length; optn++ )
+                {
+                  $("#"+val.id).append('<option value="'+optn+'" >'+data_attributes[optn]+'</option>');
+                }
+            }
+            else if (val.extra_attributes !== null)
+            {
+                $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+                $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+                data_attributes = eval('(' + val.extra_attributes + ')');
+                data_attributes = data_attributes.split(':')[1]
+                data_attributes = data_attributes.replace('(','');
+                data_attributes = data_attributes.replace(')','');
+                data_attributes = data_attributes.split(',')
+                for (var optn=0; optn < data_attributes.length; optn++ )
+                {
+                  $("#"+val.id).append('<option value='+optn+'>'+data_attributes[optn]+'</option>');
+                }
+            }
+            else {
+                $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"'></select> </div>");
+                $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+            }
+
+       }
+       else if (val.field_type=='Bulletted')
+       {
+          $(".form-inline").append("<div class='form-group'><label >"+val.name +"</label> <div class='input-group' id='"+val.id+"' > </div>  </div><span style='color:red;' id='error_"+error_id+"'></span> <br/>");
+=======
+         }
+       });
+
+        $.each(formFields, function(key, val) {
+         var icon = getAppropriateIcon(val);
+         var error_id = val.name.replace(' ', '_');
+
+         if (val.field_type=='Char' || val.field_type=='Decimal' || val.field_type=='Time' || val.field_type=='Date' || val.field_type=='Integer') {
+          if(char_Bulletted.indexOf(val.id) != -1 )
+            { return true; }
+>>>>>>> ffb1363145b98611418c225142d3c73dca323ffa
+
+          $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <input type='"+input_type[val.field_type]+"'  name='"+val.name+"'class='form-control-2' placeholder='"+val.name+"'> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+        }
+        else if (val.field_type=='Choice')
+        {
+
+          if (val.name == 'Parish') {
+           $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' onchange='setAreaDropdown(this.value);'></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+           $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+           $.each(getParishList(), function(index, value) {
+            $("#"+val.id).append('<option value="'+value.id+'">'+value.name+'</option>');
+          });
+         }
+         else if (val.name == 'Area'){
+           $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='selectArea' name='"+val.name+"'></select><span style='color:red;' id='error_"+error_id+"'></span> </div>");
+           $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+         }
+         else if (val.name == 'Currency' && val.extra_attributes !== null)
+         {
+          $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+          $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+          data_attributes = eval('(' + val.extra_attributes + ')');
+          data_attributes = data_attributes.split(':')[1]
+          data_attributes = data_attributes.replace('(','');
+          data_attributes = data_attributes.replace(')','');
+          data_attributes = data_attributes.split(',')
+          for (var optn=0; optn < data_attributes.length; optn++ )
+          {
+            $("#"+val.id).append('<option value="'+optn+'" >'+data_attributes[optn]+'</option>');
+          }
+        }
+        else if (val.extra_attributes !== null)
+        {
+<<<<<<< HEAD
+            $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select multiple class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+val.name+"'></span></div>");
+            $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+            composite_type = val.extra_attributes.split(',');
+=======
+          $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+error_id+"'></span></div>");
+          $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+          data_attributes = eval('(' + val.extra_attributes + ')');
+          data_attributes = data_attributes.split(':')[1]
+          data_attributes = data_attributes.replace('(','');
+          data_attributes = data_attributes.replace(')','');
+          data_attributes = data_attributes.split(',')
+          for (var optn=0; optn < data_attributes.length; optn++ )
+          {
+            $("#"+val.id).append('<option value='+optn+'>'+data_attributes[optn]+'</option>');
+          }
+        }
+        else {
+          $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select class='form-control custom-select' id='"+val.id+"' name='"+val.name+"'></select> </div>");
+          $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+        }
+>>>>>>> ffb1363145b98611418c225142d3c73dca323ffa
+
+      }
+      else if (val.field_type=='Bulletted')
+      {
+        $(".form-inline").append("<div class='form-group'><label >"+val.name +"</label> <div class='input-group' id='"+val.id+"' > </div>  </div><span style='color:red;' id='error_"+error_id+"'></span> <br/>");
+
+        text_fields = val.extra_attributes.split(',');
+
+<<<<<<< HEAD
+        else if (val.field_type=='Boolean')
+        {
+            boolean_tem[val.id] = "<div class='col-xs-12'><label class='col-xs-12 chkbox padding-0' >"+val.name+" <div class='checkbox inline chkbox-inline' id='"+val.id+"' ><span style='color:red;' id='error_"+error_id+"'></span>";
+        }
+        else if (val.field_type == 'Image') {
+         
+          $("#image-and-captions").append("<div class='form-group col-xs-12'><label >"+val.name +"</label> <div class=''> <div class='input-group-addon-2'><span class='glyphicon glyphicon-pencil' aria-hidden='true'> </span></div> <input type='"+input_type[val.field_type]+"' name='"+val.name+"' data-icon='false' class='filestyle'></div>");
+
+          $("#image-and-captions").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> <div class='input-group-addon-2'><span class='glyphicon glyphicon-pencil' aria-hidden='true'> </span></div> <input type='text'  name='Caption "+captionNo+"' class='form-control-2' placeholder='Caption "+captionNo+"'> </div>");
+          captionNo++;
+        }
+        else
+        {
+          $(".form-inline").append("<div class='form-group col-xs-12'><label >"+val.name +"</label> <div class=''> "+icon+" <input name='"+val.name+"' type='"+input_type[val.field_type]+"'data-icon='false' class='filestyle'><span style='color:red;' id='error_"+error_id+"'></span></div>");
+=======
+        for (var t_field=0; t_field < text_fields.length; t_field++)
+        {
+          char_Bulletted.push(text_fields[t_field]);
+          $("#"+val.id).append('<input type="text" name="'+text_fields[t_field]+'"/>');
+>>>>>>> ffb1363145b98611418c225142d3c73dca323ffa
+        }
+
+<<<<<<< HEAD
+  });
+  if (listing_id === false)
+        listing_id = get_listing_id_for_category(cat_name);
+  $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'><div class='input-group-addon-gray'><span class='glyphicon glyphicon-user' aria-hidden='true'></span></div><input type='text' name='jacId' value='"+listing_id+"' class='form-control-2' readonly style='color:gray;'> </div>");
+=======
+      }
+      else if (val.field_type=='Composite')
+      {
+        $(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'> "+icon+" <select multiple class='form-control custom-select' id='"+val.id+"' name='"+val.name+"' ></select> <span style='color:red;' id='error_"+val.name+"'></span></div>");
+        $("#"+val.id).append('<option value="" disabled selected>'+val.name+'</option>');
+        composite_type = val.extra_attributes.split(',');
+
+        for (var item_com=0; item_com<composite_type.length; item_com++)
+          $("#"+val.id).append('<option value="'+composite_type[item_com]+'" >'+composite_type[item_com]+'</option>');
+
+      }
+
+      else if (val.field_type=='Boolean')
+      {
+        boolean_tem[val.id] = "<div class='col-xs-12'><label class='col-xs-12 chkbox padding-0' >"+val.name+" <div class='checkbox inline chkbox-inline' id='"+val.id+"' ><span style='color:red;' id='error_"+error_id+"'></span>";
+      }
+      else
+      {
+        $(".form-inline").append("<div class='form-group col-xs-12'><label >"+val.name +"</label> <div class=''> "+icon+" <input type='"+input_type[val.field_type]+"'data-icon='false' class='filestyle'><span style='color:red;' id='error_"+error_id+"'></span></div>");
+      }
+      $(":file").filestyle({icon: false});
+
+    });
+if (listing_id === false)
+  listing_id = get_listing_id_for_category(cat_name);
+$(".form-inline").append("<div class='form-group col-xs-12'><div class='input-group col-xs-12 padding-0'><div class='input-group-addon-gray'><span class='glyphicon glyphicon-user' aria-hidden='true'></span></div><input type='text' name='jacId' value='"+listing_id+"' class='form-control-2' readonly style='color:gray;'> </div>");
+>>>>>>> ffb1363145b98611418c225142d3c73dca323ffa
+
+}
+
+function mylistingPage(pageUrl) {
+  if (pageUrl){
+    $.ajax({
+      url: pageUrl,
+      type: 'GET',
+      beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+      success: function(result) {
+        myListing = result;
+        prev = result.previous;
+        next = result.next;
+        $('#myListings').empty();
+        $.each(myListing.results, function(index, value){ postListingBox(value);});
+      }
+    });
+  }
+
+}
+var next = '';
+var prev = '';
+function getMyListings(posted, page){
+  var myListing = [];
+  listingUrl = "{{base_url}}/api/myListings/?page="+page+"&posted";
+  listingUrl+= posted;
+  $.ajax({
+    url: listingUrl,
+    type: 'GET',
+    beforeSend: function(xhr, settings) { xhr.setRequestHeader('Authorization','Token {{token}}'); },
+    success: function(result) {
+      
+      $('#tab3default').css({'display':'block', 'overflow':'hidden'})
+      myListing = result;
+      prev = result.previous;
+      next = result.next;
+      $('#myListings').empty();
+      $.each(myListing.results, function(index, value){ postListingBox(value);});
+      $('#tab3default-1').jsScroll({
+        height: '530px'
+      });
+      if( $('#tab3default').hasClass('active') ){
+
+      } else {
+        $('#tab3default').css({'display':'none'})  
+      }
+      
+    }
+  });
+}
+
+function postListingBox(listing){
+  var is_posted = (listing.is_posted) ? "Posted" : "Unposted";
+  var featured_class = "col-box";
+  var image_url = "/static/images/pic-no.jpg";
+  var caption = '';
+  var title = '', content='';
+  var currency, price, per;
+  var year, make, model;
+  var parish, area;
+  var phone1;
+  var categoryName = listing.breadcrumb.split(" > ")[0];
+
+  $.each(listing.postings, function(k,v){
+    if (v.value === null)
+      return true;
+
+    if (v.field.name == 'Title')
+      title = v.value;
+    if (v.field.name === 'Photo 1')
+      image_url = v.value;
+    if (v.field.name === 'Caption 1')
+      caption = v.value;
+
+    if (v.field.name === 'Currency')
+      currency = v.value
+    if (v.field.name === 'Price')
+      price = v.value
+    if (v.field.name === 'Per')
+      per = v.value
+
+    if (v.field.name === 'Parish')
+      parish = v.value
+    if (v.field.name === 'Area')
+      area = v.value
+
+    if (v.field.name === 'Phone 1')
+      phone1 = v.value;
+
+  });
+
+  if (currency) content+=currency;
+  if (price) content+=price;
+  if (per) content+="per "+per;
+  if (content) content+='<br>';
+  if (parish && area) content+=parish+","+area+"<br>";
+  if (phone1) content+=phone1;
+
+  var box = '<div id="'+listing.id+'" class="box '+is_posted+'">';
+  box+='<h6 style="padding: 0px 13px; margin:0; background-color: 595959;">'+listing.breadcrumb+'</h6>';
+  if (listing.featured){
+    featured_class = "col-box-featured";
+    box+='<div class="f-listing"><span class="glyphicon glyphicon-star" style="color: #229500;" aria-hidden="true"></span> FEATURE LISTING </div>';
+  }
+
+  box+='<div class="'+featured_class+'"><div class="col-1"><img src="{{base_url}}'+image_url+' " style="width: 100%; height: 100%;">';
+  box+='<span class="col-1-d"><small>'+caption+'</small></span></div>';
+  box+='<div class="col-2"><div class="text-right"><small>'+is_posted+'</small></div>';
+  box+='<div class="text-p">';
+  box+='<p class="pmargin"><b>'+title+'</b></p>';
+  box+='<p class="pmargin">'+content+'</p>';
+  box+='</div>';
+  box+='<div class="col-2-d">';
+  box+='<div class="text-down"><small>'+listing.posted_on+'</small>';
+  box+='<div class="text-icon">';
+
+  if (listing.is_posted)
+    box+='<span class="glyphicon glyphicon-file" aria-hidden="true" onclick=copy_post("'+listing.listing_id+'","'+categoryName+'");></span>&nbsp;&nbsp;';
+  else
+    box+='<span class="glyphicon glyphicon-pencil" aria-hidden="true" onclick=edit_post("'+categoryName+'","'+listing.category+'","'+listing.subcategory+'","'+listing.subcategory2+'","'+listing.listing_id+'");></span>&nbsp;&nbsp;';
+
+  box+='<span class="glyphicon glyphicon-trash" aria-hidden="true" onclick=delete_post("'+listing.listing_id+'");></span>';
+  box+='</div></div></div></div><div class="clearfix"></div></div></div>';
+
+  $('#myListings').append(box);
+
+}
+$('#prev-link').on('click', function(e){
+  mylistingPage(prev);
+  e.preventDefault();
+});
+$('#next-link').on('click', function(e){
+  mylistingPage(next);
+  e.preventDefault();
+});
+
+function getAppropriateIcon(field)
+{
+  var requiredColor;
+  var iconClass;
+  if(field.required){
+    requiredFormFields.push(field.name);
+    requiredColor = 2;
+  }else{
+    requiredColor = 'gray';
+  }
+
+  if (field.name == "Bath") {
+    iconClass = 'glyphicon-bath';
+  }
+  else if (field.name == "Bed") {
+    iconClass = 'glyphicon-bed';
+  }
+  else if (field.name == "Currency" || field.name == "Price") {
+    iconClass = 'glyphicon-usd';
+  }
+  else if (field.name == "Phone") {
+    iconClass = 'glyphicon-phone';
+  }
+  else if (field.name == "Parish" || field.name == "Area" || field.name == "Address") {
+    iconClass = 'glyphicon-map-marker';
+  }
+  else if (field.name == "Email") {
+    iconClass = 'glyphicon-envelope';
+  }
+  else if (field.field_type == "Char") {
+    iconClass = 'glyphicon-pencil';
+  }
+  else {
+    iconClass = 'glyphicon-user';
+  }
+
+  var icon = "<div class='input-group-addon-"+requiredColor+"'><span class='glyphicon "+iconClass+"' aria-hidden='true'></span></div>";
+  return icon;
+}
+
+$(function(){
+
+  getMyListings("",1);
+  $('#tab1default-1').jsScroll();
+  $('#tab3default').css({'display':'block'})
+  
+  $('a[href="#tab3default"]').on('click', function(){
+    $('#tab3default').css({'display':'block'})
+  })
+  $('a[href="#tab1default"]').on('click', function(){
+    $('#tab3default').css({'display':'none'})
+  })
+
+})
+$("#image-caption").click(function(){
+  $('#dynamicForm').hide();
+  $('#image-and-captions').show();
+  $('#catListing').hide();
+});
+// $("#post-back").click(function(){
+function goBack() {  
+  console.log("Clicked");
+  $('#image-and-captions').hide();
+  $('#catListing').hide();
+  $('#dynamicForm').show();
+}
+</script>
+{% endblock %}
+
+
