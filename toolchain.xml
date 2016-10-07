@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<Toolchain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ToolchainName>Raspberry PI</ToolchainName>
+    <ToolchainType>Linux</ToolchainType>
+	<ToolchainID>com.visualgdb.raspberry_pi</ToolchainID>
+	<BinaryDirectory>bin</BinaryDirectory>
+	<Prefix>arm-linux-gnueabihf-</Prefix>
+	<GCCVersion>4.6.3</GCCVersion>
+	<GDBVersion>7.5.1</GDBVersion>
+  </Toolchain>
